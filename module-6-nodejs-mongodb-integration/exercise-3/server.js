@@ -17,46 +17,58 @@ webServer.use(cors());
 webServer.use(express.json());
 
 // HEALTH DATA
-const HEALTH_DATA_KEYS = [
-  "duration",
-  "distance",
-  "average_heart_rate",
-  "user_id",
-];
+const COMPANY_KEY = ["name", "taxId"];
 
-webServer.get("/", async (req, res) => {
-  res.send("Hello World");
-});
 // server routes
 
-webServer.get("/company", async (req, res) => {
-  // writing code here
-  const handleDataGet = await databaseClient.db().collection("company").find({}).toArray();
-  res.json(handleDataGet);
+webServer.get("/", (req, res) => {
+  res.send("Hello World");
 });
 
-const COMPANY_DATA_KEY = [
-  "name",
-  "taxId",
-];
+webServer.get("/company", async (req, res) => {
+  const data = await databaseClient
+    .db()
+    .collection("company")
+    .find({})
+    .toArray();
+  res.json(data);
+});
 
 webServer.post("/company", async (req, res) => {
-  // writing code here
-  let body = req.body;
-  const [isBodyChecked, missingFields] = checkMissingField(
-    COMPANY_DATA_KEY,
-    body
-  );
-  if (!isBodyChecked) {
-    res.send(`Missing Fields: ${"".concat(missingFields)}`);
-    return;
-  }
+  const body = req.body;
 
-  body["user_id"] = new ObjectId(body.user_id);
+  // check missing fields here
 
-  await databaseClient.db().collection("company").insertOne(body);
-  res.send("Create company data successfully");
+  // create data
+  const data = {
+    ...body,
+    employees: [],
+  };
+
+  await databaseClient.db().collection("company").insertOne(data);
+  res.send("Create Company Successfully");
 });
+
+webServer.post("/company/employee", async (req, res) => {
+  const body = req.body;
+
+  // check missing fields here
+
+  // create data
+  const companyId = body.company_id;
+  const userId = body.user_id;
+
+  await databaseClient
+    .db()
+    .collection("company")
+    .updateOne(
+      { _id: new ObjectId(companyId) },
+      { $push: { employees: new ObjectId(userId) } }
+    );
+
+  res.send("Add employee to company");
+});
+
 // initilize web server
 const currentServer = webServer.listen(PORT, HOSTNAME, () => {
   console.log(
