@@ -26,10 +26,12 @@ webServer.get("/", (req, res) => res.send("This is user management system"));
 
 webServer.get("/members", async (req, res) => {
   const members = await databaseClient
-    .db()
-    .collection("members")
-    .find()
-    .toArray();
+  .db()
+  .collection("members")
+  .find({} , {projection: {username:0 , password:0}})
+  .toArray();
+
+
   res.json(members);
 });
 
@@ -50,6 +52,9 @@ webServer.post("/members", async (req, res) => {
   res.send("Create User Successfully");
 });
 
+
+// const LOGIN_DATA_KEYS = ["username", "password"];
+
 webServer.post("/login", async (req, res) => {
   let body = req.body;
   const [isBodyChecked, missingFields] = checkMissingField(
@@ -67,12 +72,12 @@ webServer.post("/login", async (req, res) => {
     .collection("members")
     .findOne({ username: body.username });
   if (user === null) {
-    res.send("User not found");
+    res.send("User or Password invalid");
     return;
   }
   // hash password
   if (!bcrypt.compareSync(body.password, user.password)) {
-    res.send("Password is incorrect");
+    res.send("User or Password invalid");
     return;
   }
   const returnUser = {
