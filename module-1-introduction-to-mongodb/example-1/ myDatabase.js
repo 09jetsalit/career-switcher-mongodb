@@ -12,8 +12,18 @@ const data = [
 ];
 
 // profit only
-
+const profit = data.filter((item => {
+  if ( item > 0) {
+    return item;
+  }
+}))
 // loss only
+
+const loss = data.filter((item) => {
+  if (item < 0) {
+    return item;
+  }
+})
 
 // max profit
 

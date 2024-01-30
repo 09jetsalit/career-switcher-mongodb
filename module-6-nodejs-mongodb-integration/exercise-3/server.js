@@ -24,14 +24,38 @@ const HEALTH_DATA_KEYS = [
   "user_id",
 ];
 
+webServer.get("/", async (req, res) => {
+  res.send("Hello World");
+});
 // server routes
 
 webServer.get("/company", async (req, res) => {
   // writing code here
+  const handleDataGet = await databaseClient.db().collection("company").find({}).toArray();
+  res.json(handleDataGet);
 });
+
+const COMPANY_DATA_KEY = [
+  "name",
+  "taxId",
+];
 
 webServer.post("/company", async (req, res) => {
   // writing code here
+  let body = req.body;
+  const [isBodyChecked, missingFields] = checkMissingField(
+    COMPANY_DATA_KEY,
+    body
+  );
+  if (!isBodyChecked) {
+    res.send(`Missing Fields: ${"".concat(missingFields)}`);
+    return;
+  }
+
+  body["user_id"] = new ObjectId(body.user_id);
+
+  await databaseClient.db().collection("company").insertOne(body);
+  res.send("Create company data successfully");
 });
 // initilize web server
 const currentServer = webServer.listen(PORT, HOSTNAME, () => {

@@ -18,10 +18,9 @@ webServer.use(express.json());
 
 // HEALTH DATA
 const HEALTH_DATA_KEYS = [
-  "duration",
-  "distance",
-  "average_heart_rate",
-  "user_id",
+  "name",
+  "age",
+  "weight",
 ];
 
 // server routes
